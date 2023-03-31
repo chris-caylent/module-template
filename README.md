@@ -5,8 +5,6 @@ Template to develop a custom Terraform module
 - [terraform-docs](https://github.com/segmentio/terraform-docs) - This is used in our pre-commit hook in order to generate documentation from Terraform modules in various output formats.
 - [pre-commit](https://pre-commit.com/#install)
 
-[[_TOC_]]
-
 ---------------------
 
 ## Prerequisites
@@ -159,6 +157,8 @@ go test run TestSimpleTest
 
 # print the test output to a file
 go test -v -timeout 30m | tee ~/Desktop/module_terratest_output.txt
+
+```
 
 #### Supporting Documentation
 
