@@ -10,19 +10,19 @@
 ####################################################################################################################
 
 variable "foo" {
-  type = string
+  type        = string
   description = "value"
-  default = ""
+  default     = ""
 }
 
 variable "bar" {
-  type = map(any)
+  type        = map(any)
   description = "value"
-  default = {}
+  default     = {}
 }
 
 variable "baz" {
-  type = list(string)
+  type        = list(string)
   description = "value"
-  default = [ "value" ]
+  default     = ["value"]
 }

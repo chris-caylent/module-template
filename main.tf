@@ -8,5 +8,5 @@ module "foo" {
 }
 
 resource "some_aws_resource" "bar" {
-  
+
 }
