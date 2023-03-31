@@ -1,5 +1,5 @@
 # module-template
-Template to develop a custom Terraform module
+Template to develop a custom Terraform module.
 
 ## Requisites
 - [terraform-docs](https://github.com/segmentio/terraform-docs) - This is used in our pre-commit hook in order to generate documentation from Terraform modules in various output formats.
