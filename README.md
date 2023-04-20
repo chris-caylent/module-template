@@ -1,17 +1,18 @@
-# module-template
-Template to develop a custom Terraform module.
+## Requirements
 
-## Requisites
+- [tfenv](https://github.com/tfutils/tfenv) - This is used in order to manage different Terraform versions
 - [terraform-docs](https://github.com/segmentio/terraform-docs) - This is used in our pre-commit hook in order to generate documentation from Terraform modules in various output formats.
-- [pre-commit](https://pre-commit.com/#install)
+- [pre-commit](https://pre-commit.com/#install)-configuration to run code standardization (terraform fmt) and documentation (terraform docs) automation on `git commit`
+- [Granted](https://docs.commonfate.io/granted/getting-started) (optional) - tooling to help assume your SSO role into an AWS account
+- Public cloud provider access credentials (if not using Granted)
 
 ---------------------
 
 ## Prerequisites
 
-### You need to remove Terraform if they already installed in your system, the following versions are used for this project
+This codebase uses the following Terraform and Golang versions.  Code has not be tested and verified to work with any other versions other than what is listed below:
 
-- Tarraform: 1.2.0
+- Terraform: 1.2.0
 - Go: 1.18
 
 ### Installation Steps (MacOS)
@@ -51,7 +52,7 @@ tfenv use 1.2.0
 - [Pre-Commit documentation](https://pre-commit.com/)
 - [Hook documentation](https://github.com/antonbabenko/pre-commit-terraform)
 
-You must `git add` your files before the pre-commit hook will run against them.
+You must `git add .` your files before the pre-commit hook will run against them.
 
 ##### Check the version
 
@@ -63,7 +64,6 @@ pre-commit --version
 
 ```sh
 pre-commit install
-pre-commit install-hooks
 ```
 
 ##### Run against all files (`git add` must be run first)
@@ -72,25 +72,70 @@ pre-commit install-hooks
 pre-commit run -a
 ```
 
-#### **Terraform**
+## Authenticate to AWS environments with Granted (Optional)
 
 ---------------------
 
-Prerequisites:
+Below are steps to ensure easy access to AWS environments by assuming your SSO role with [Granted](https://docs.commonfate.io/granted/getting-started)
 
-- You can successfully authenticate to AWS via CLI using or other CLI auth tool (like granted.dev) or your preferred method of authentication.
-- You have the correct version of Terraform installed through `tfenv`
+```sh
+# install with Homebrew
+brew tap common-fate/granted
+brew install granted
 
-When developing modules, it is easier to run these commands from your example directory where you have already defined an example for your tests to run against.
+# verify installation
+➜ granted -v
 
-Navigate to the directory where you would like to run your terraform configuration, authenticate to AWS through the CLI (optionally through Granted)
+Granted v0.3.0
+```
 
-```hcl
-terraform init (install modules, both local and external)
-terraform validate (validate your configuration will not error before the plan/apply stage)
-terraform plan (check what you're going to provision)
-terraform apply (deploy the infrastructure)
-terraform destroy (destroy the infrastructure)
+### **Setup your AWS profile**
+
+Follow the steps as outlined by executing the command in your terminal: `aws configure sso`
+
+```sh
+aws configure sso
+> SSO start URL [None]: <Start URL> (the redirect URL after you login to AWS Control Tower through an SSO provider)
+> SSO Region: us-west-2
+
+# after the above values are entered your browser will open to and have you confirm
+# a few prompts.  Allow the authorize request.
+
+#When successful, you will see a "Request Approved" AWS Modal in your browser tab.
+
+# Go back to the Terminal session to finish the prompts
+
+# Pick the account to which you wish to create a profile, you may also see all accounts to which you have access.
+
+# Pick your assigned role, this will vary based on your organization
+# Default CLI region: us-west-2
+# Output format: JSON
+
+# CLI Profile name: you can keep what is generated (not recommended) or use something explicit to the environment, like "shared-services-admin"
+
+```
+
+Test your credentials
+
+```sh
+$ assume
+ Please select the profile you would like to assume:  [Use arrows to move, type to filter]
+> shared-services-admin (this is the profile you created in the previous step)
+
+# You will then see a message like: 
+[shared-services-admin](us-west-2) session credentials will expire 2022-09-27 14:15:48 -0400 EDT
+>
+
+# check to be sure you can query sts and receive your assume role arn back
+$ aws sts get-caller-identiy
+> 
+{
+    "UserId": "(redacted):chris.gonzalez@caylent.com",
+    "Account": "1111111111",
+    "Arn": "arn:aws:sts::1111111111:assumed-role/AWSReservedSSO_AWSPowerUserAccess_(redacted)/chris.gonzalez@caylent.com"
+}
+
+# if the above commands are successful, then you can now use Terraform or Run terrestest from your local machine
 ```
 
 #### **Go**
@@ -153,11 +198,35 @@ go test
 go test -v -timeout 30m
 
 # run a single test, be sure the test case matches the regex TestSimpleDynamoDb
-go test run TestSimpleTest
+to test run eks-example-cluster
 
 # print the test output to a file
 go test -v -timeout 30m | tee ~/Desktop/module_terratest_output.txt
+```
 
+#### Supporting Documentation
+
+- [Terratest documentation](https://terratest.gruntwork.io/docs/#getting-started)
+
+### **Terraform**
+
+---------------------
+
+Prerequisites:
+
+- You can successfully authenticate to AWS via CLI using Granted or your preferred method of authentication.
+- You have the correct version of Terraform installed through `tfenv`
+
+When developing modules, it is easier to run these commands from your example directory where you have already defined an example for your tests to run against.
+
+Navigate to the directory where you would like to run your terraform configuration, authenticate to AWS through the CLI (optionally through Granted)
+
+```hcl
+terraform init (install modules, both local and external)
+terraform validate (validate your configuration will not error before the plan/apply stage)
+terraform plan (check what you're going to provision)
+terraform apply (deploy the infrastructure)
+terraform destroy (destroy the infrastructure)
 ```
 
 #### Supporting Documentation
